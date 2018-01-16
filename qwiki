@@ -1,0 +1,17 @@
+# set mailserver
+set mailserver localhost
+
+# set webinterface
+set httpd port 2812
+    allow admin:admin
+
+# check and restart mattdaemon based on mattdaemon-query result
+check program mattdaemon-query with path "/var/www/qwikis/qwiki/tools/mattdaemon-query type=queue_status core=/var/www/qwikis/qwiki" as uid "www-data"
+    if status !=0 then exec "/bin/bash -c 'sudo systemctl restart mattdaemon'"
+
+# provide restart buttons for apache2 in frontend
+check process apache with pidfile /run/apache2/apache2.pid
+    start program = "/bin/systemctl start apache2.service" with timeout 60 seconds
+    stop program  = "/bin/systemctl stop apache2.service"
+    restart program  = "/bin/systemctl restart apache2.service"
+
